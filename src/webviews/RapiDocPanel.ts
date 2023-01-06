@@ -69,6 +69,12 @@ export class RapiDocPanel {
           case 'alert':
             vscode.window.showErrorMessage(message.text)
             return
+          case 'info':
+            vscode.window.showInformationMessage(message.text)
+            return
+          default:
+            console.log(message.text)
+            return
         }
       },
       null,
@@ -127,7 +133,6 @@ export class RapiDocPanel {
     const scriptWebviewUri = webview.asWebviewUri(scriptPathOnDisk)
     const nonce = getNonce()
 
-    //TODO: onDidChangeActiveColorTheme: Event<ColorTheme>
     const panelTheme = {
       [vscode.ColorThemeKind.Light]: 'light',
       [vscode.ColorThemeKind.Dark]: 'dark',
