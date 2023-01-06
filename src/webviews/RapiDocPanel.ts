@@ -1,4 +1,5 @@
 import * as vscode from 'vscode'
+import * as crypto from 'crypto'
 
 export class RapiDocPanel {
   /**
@@ -43,8 +44,8 @@ export class RapiDocPanel {
     this._panel = panel
     this._extensionUri = extensionUri
 
-    this._update()  // Set the webview's initial html content
-    this._setPanelIcon()  // Icon
+    this._update() // Set the webview's initial html content
+    this._setPanelIcon() // Icon
 
     // Listen for when the panel is disposed
     // This happens when the user closes the panel or when the panel is closed programmatically
@@ -68,6 +69,12 @@ export class RapiDocPanel {
           case 'alert':
             vscode.window.showErrorMessage(message.text)
             return
+          case 'info':
+            vscode.window.showInformationMessage(message.text)
+            return
+          default:
+            console.log(message.text)
+            return
         }
       },
       null,
@@ -75,8 +82,8 @@ export class RapiDocPanel {
     )
 
     vscode.window.onDidChangeActiveColorTheme((theme) => {
-			this._update();
-		});
+      this._update()
+    })
   }
 
   public updateOpenApi() {
@@ -99,14 +106,13 @@ export class RapiDocPanel {
     }
   }
 
-  
   private _setPanelIcon() {
     const iconPathOnDisk = vscode.Uri.joinPath(
       this._extensionUri,
       'assets',
       'openapi-icon-light.png'
     )
-    this._panel.iconPath = iconPathOnDisk;
+    this._panel.iconPath = iconPathOnDisk
   }
 
   private _update() {
@@ -127,18 +133,17 @@ export class RapiDocPanel {
     const scriptWebviewUri = webview.asWebviewUri(scriptPathOnDisk)
     const nonce = getNonce()
 
-    //TODO: onDidChangeActiveColorTheme: Event<ColorTheme>
     const panelTheme = {
-      [vscode.ColorThemeKind.Light]: "light",
-      [vscode.ColorThemeKind.Dark]: "dark",
-      [vscode.ColorThemeKind.HighContrast]: "dark",
-      [vscode.ColorThemeKind.HighContrastLight]: "light",
-    }[vscode.window.activeColorTheme.kind];
+      [vscode.ColorThemeKind.Light]: 'light',
+      [vscode.ColorThemeKind.Dark]: 'dark',
+      [vscode.ColorThemeKind.HighContrast]: 'dark',
+      [vscode.ColorThemeKind.HighContrastLight]: 'light',
+    }[vscode.window.activeColorTheme.kind]
 
     const bgColor = {
-      "light": "#F3F3F3",
-      "dark": "#252526",
-    }[panelTheme];
+      light: '#F3F3F3',
+      dark: '#252526',
+    }[panelTheme]
 
     return `<!doctype html>
     <html>
@@ -173,13 +178,8 @@ export class RapiDocPanel {
 }
 
 function getNonce() {
-  let text = ''
-  const possible =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-  for (let i = 0; i < 32; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length))
-  }
-  return text
+  const nonce = crypto.randomBytes(32).toString('base64')
+  return nonce
 }
 
 export function getWebviewOptions(

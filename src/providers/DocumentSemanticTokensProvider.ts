@@ -1,4 +1,3 @@
-/* eslint-disable no-prototype-builtins */
 import {
   SemanticTokensLegend,
   DocumentSemanticTokensProvider,
@@ -33,22 +32,19 @@ export class OpenApiDocumentSemanticTokensProvider
     document: TextDocument,
     token: CancellationToken
   ): Promise<SemanticTokens> {
-    
+
     const isValid = this._parseTokenText(document.getText())
     commands.executeCommand('setContext', 'openapi.isValid', isValid);
 
     return new SemanticTokensBuilder().build()
   }
 
-  private _parseTokenText(text: string): boolean {    
+  private _parseTokenText(text: string): boolean {
     const openApiJson = JSON.parse(text);
-    if(openApiJson.hasOwnProperty('openapi')){
+    // eslint-disable-next-line no-prototype-builtins
+    if(openApiJson.hasOwnProperty('openapi') || openApiJson.hasOwnProperty('swagger')){
       return true;
     }
-    else if(openApiJson.hasOwnProperty('swagger')){
-      return true;
-    }
-
-    return false;  
+    return false;
   }
 }
