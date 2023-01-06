@@ -23,14 +23,14 @@ The vscode-openapi-viewer extension is a valuable tool for developers and archit
 ## Getting started
 
 1. First, open Visual Studio and go to the "Extensions" tab in the toolbar.
-2. In the search bar, type "OpenAPI Preview" and press enter.
-3. Click on the "OpenAPI Preview" extension in the search results and click "Download".
+2. In the search bar, type "vscode-openapi-viewer" and press enter.
+3. Click on the "vscode-openapi-viewer" extension in the search results and click "Download".
 4. Once the extension has been downloaded, click "Install" to install it.
 5. After the installation, you will need to restart Visual Studio for the changes to take effect.
 6. Once Visual Studio has been restarted, you can open an OpenAPI specification file by going to "File > Open > File" and selecting the openapi specification file from your project.
 7. The OpenAPI specification will be displayed in the Visual Studio editor. If the specification is valid, a preview button will appear. You can use this document to test and debug your APIs and generate documentation for them.
 
-That's it! You should now be able to use the OpenAPI preview extension in Visual Studio to view and edit your OpenAPI specifications visually, visually, and intuitively.
+That's it! You should now be able to use the vscode-openapi-viewer extension in Visual Studio Code to view and edit your OpenAPI specifications visually, and intuitively.
 
 ![vscode-openapi-viewer.gif](images/vscode-openapi-viewer.gif)
 
