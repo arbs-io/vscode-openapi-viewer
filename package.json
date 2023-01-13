@@ -2,7 +2,7 @@
   "name": "vscode-openapi-viewer",
   "displayName": "vscode-openapi-viewer",
   "description": "A vscode extension to view openapi specifications",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "publisher": "AndrewButson",
   "icon": "images/logo_128x128.png",
   "private": true,
@@ -77,6 +77,6 @@
     "esbuild": "^0.16.9",
     "eslint": "^8.30.0",
     "typescript": "^4.9.4",
-    "vsce": "^2.11.0"
+    "@vscode/vsce": "^2.16.0"
   }
 }
