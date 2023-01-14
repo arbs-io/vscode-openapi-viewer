@@ -1,13 +1,13 @@
 import * as vscode from 'vscode'
 import * as crypto from 'crypto'
 
-export class RapiDocPanel {
+export class OpenApiPanel {
   /**
    * Track the currently panel. Only allow a single panel to exist at a time.
    */
-  public static currentPanel: RapiDocPanel | undefined
+  public static currentPanel: OpenApiPanel | undefined
 
-  public static readonly viewType = 'RapiDocPanel'
+  public static readonly viewType = 'OpenApiPanel'
 
   private readonly _panel: vscode.WebviewPanel
   private readonly _extensionUri: vscode.Uri
@@ -20,24 +20,24 @@ export class RapiDocPanel {
       : undefined
 
     // If we already have a panel, show it.
-    if (RapiDocPanel.currentPanel) {
-      RapiDocPanel.currentPanel._panel.reveal(column)
+    if (OpenApiPanel.currentPanel) {
+      OpenApiPanel.currentPanel._panel.reveal(column)
       return
     }
 
     // Otherwise, create a new panel.
     const panel = vscode.window.createWebviewPanel(
-      RapiDocPanel.viewType,
+      OpenApiPanel.viewType,
       '[Preview] ', // + openapiUri.scheme,
       column || vscode.ViewColumn.Two,
       getWebviewOptions(extensionUri)
     )
 
-    RapiDocPanel.currentPanel = new RapiDocPanel(panel, extensionUri)
+    OpenApiPanel.currentPanel = new OpenApiPanel(panel, extensionUri)
   }
 
   public static revive(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
-    RapiDocPanel.currentPanel = new RapiDocPanel(panel, extensionUri)
+    OpenApiPanel.currentPanel = new OpenApiPanel(panel, extensionUri)
   }
 
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
@@ -93,7 +93,7 @@ export class RapiDocPanel {
   }
 
   public dispose() {
-    RapiDocPanel.currentPanel = undefined
+    OpenApiPanel.currentPanel = undefined
 
     // Clean up our resources
     this._panel.dispose()
@@ -153,7 +153,7 @@ export class RapiDocPanel {
       </head>
       <body>
         <rapi-doc
-          id="RapiDocPanel"
+          id="OpenApiPanel"
           theme = '${panelTheme}'
           show-header = 'false'
           show-info = 'true'
@@ -168,7 +168,7 @@ export class RapiDocPanel {
         <script>
           window.addEventListener('message', event => {
             let objSpec = JSON.parse(event.data);
-            let docEl = document.getElementById("RapiDocPanel");
+            let docEl = document.getElementById("OpenApiPanel");
             docEl.loadSpec(objSpec);
           });
         </script>
