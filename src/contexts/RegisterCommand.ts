@@ -1,16 +1,14 @@
 import {
   commands,
   ExtensionContext,
-  TextDocument,
   TextDocumentChangeEvent,
-  TextEdit,
   TextEditor,
   Uri,
   WebviewPanel,
   window,
   workspace,
 } from 'vscode'
-import { RapiDocPanel, getWebviewOptions } from '../webviews/RapiDocPanel'
+import { RapiDocPanel, getWebviewOptions } from '../webviews/rapiDocPanel'
 import { ActiveEditorTracker } from '../utils/activeEditorTracker'
 
 export function RegisterCommand(context: ExtensionContext) {
@@ -35,6 +33,11 @@ function showPreviewOpenApi(context: ExtensionContext) {
   context.subscriptions.push(
     workspace.onDidChangeTextDocument((e) => _handleDidChangeTextDocument(e))
   )
+
+  const activeEditor = window.activeTextEditor
+  if (activeEditor) {
+    _setContext(activeEditor.document.getText())
+  }
 
   if (window.registerWebviewPanelSerializer) {
     // Make sure we register a serializer in activation event
@@ -68,11 +71,7 @@ function _handleDidChangeTextDocument(event: TextDocumentChangeEvent): void {
 
 function _setContext(text: string): void {
   const openApiJson = JSON.parse(text)
-  // eslint-disable-next-line no-prototype-builtins
-  if (
-    openApiJson.hasOwnProperty('openapi') ||
-    openApiJson.hasOwnProperty('swagger')
-  ) {
+  if (openApiJson['openapi'] || openApiJson['swagger']) {
     commands.executeCommand('setContext', 'openapi.isValid', true)
   } else {
     commands.executeCommand('setContext', 'openapi.isValid', false)
