@@ -1,15 +1,8 @@
-import * as vscode from 'vscode';
+import * as vscode from 'vscode'
 
-export const json = 'json';
-
-export const jsTsLanguageModes = [
-	json
-];
+export const json = 'json'
+export const openApiLanguageModes = [json]
 
 export function isSupportedLanguageMode(doc: vscode.TextDocument) {
-	return vscode.languages.match([json], doc) > 0;
-}
-
-export function isTypeScriptDocument(doc: vscode.TextDocument) {
-	return vscode.languages.match([json], doc) > 0;
+  return vscode.languages.match([json], doc) > 0
 }
