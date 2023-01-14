@@ -8,7 +8,7 @@ import {
   window,
   workspace,
 } from 'vscode'
-import { RapiDocPanel, getWebviewOptions } from '../webviews/rapiDocPanel'
+import { OpenApiPanel, getWebviewOptions } from '../webviews/openApiPanel'
 import { ActiveEditorTracker } from '../utils/activeEditorTracker'
 
 export function RegisterCommand(context: ExtensionContext) {
@@ -18,8 +18,8 @@ export function RegisterCommand(context: ExtensionContext) {
 function showPreviewOpenApi(context: ExtensionContext) {
   const command = 'openapi.showPreviewOpenApi'
   const commandHandler = (uri: Uri) => {
-    RapiDocPanel.createOrShow(context.extensionUri)
-    RapiDocPanel.currentPanel?.updateOpenApi()
+    OpenApiPanel.createOrShow(context.extensionUri)
+    OpenApiPanel.currentPanel?.updateOpenApi()
   }
   context.subscriptions.push(commands.registerCommand(command, commandHandler))
 
@@ -41,11 +41,11 @@ function showPreviewOpenApi(context: ExtensionContext) {
 
   if (window.registerWebviewPanelSerializer) {
     // Make sure we register a serializer in activation event
-    window.registerWebviewPanelSerializer(RapiDocPanel.viewType, {
+    window.registerWebviewPanelSerializer(OpenApiPanel.viewType, {
       async deserializeWebviewPanel(webviewPanel: WebviewPanel, state: any) {
         // Reset the webview options so we use latest uri for `localResourceRoots`.
         webviewPanel.webview.options = getWebviewOptions(context.extensionUri)
-        RapiDocPanel.revive(webviewPanel, context.extensionUri)
+        OpenApiPanel.revive(webviewPanel, context.extensionUri)
       },
     })
   }
