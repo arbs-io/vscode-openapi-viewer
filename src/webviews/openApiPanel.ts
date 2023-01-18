@@ -2,17 +2,11 @@ import * as vscode from 'vscode'
 import * as crypto from 'crypto'
 
 export class OpenApiPanel {
-  /**
-   * Track the currently panel. Only allow a single panel to exist at a time.
-   */
   public static currentPanel: OpenApiPanel | undefined
-
-  public static readonly viewType = 'OpenApiPanel'
-
+  public static readonly _viewType = 'OpenApiPanel'
   private readonly _panel: vscode.WebviewPanel
   private readonly _extensionUri: vscode.Uri
   private _disposables: vscode.Disposable[] = []
-  private openapiJsonCache: string | undefined
 
   public static createOrShow(extensionUri: vscode.Uri) {
     const column = vscode.window.activeTextEditor
@@ -27,10 +21,10 @@ export class OpenApiPanel {
 
     // Otherwise, create a new panel.
     const panel = vscode.window.createWebviewPanel(
-      OpenApiPanel.viewType,
+      OpenApiPanel._viewType,
       '[Preview] ', // + openapiUri.scheme,
-      column || vscode.ViewColumn.Two,
-      getWebviewOptions(extensionUri)
+      column || vscode.ViewColumn.Beside,
+      OpenApiPanel._getWebviewOptions(extensionUri)
     )
 
     OpenApiPanel.currentPanel = new OpenApiPanel(panel, extensionUri)
@@ -50,17 +44,6 @@ export class OpenApiPanel {
     // Listen for when the panel is disposed
     // This happens when the user closes the panel or when the panel is closed programmatically
     this._panel.onDidDispose(() => this.dispose(), null, this._disposables)
-
-    // Update the content based on view changes
-    this._panel.onDidChangeViewState(
-      (e) => {
-        if (this._panel.visible) {
-          this._update()
-        }
-      },
-      null,
-      this._disposables
-    )
 
     // Handle messages from the webview
     this._panel.webview.onDidReceiveMessage(
@@ -87,9 +70,12 @@ export class OpenApiPanel {
   }
 
   public updateOpenApi() {
-    const _openapiText = vscode.window.activeTextEditor?.document.getText()
-    this.openapiJsonCache = _openapiText ? _openapiText : this.openapiJsonCache
-    this._panel.webview.postMessage(this.openapiJsonCache)
+    const openapiText = vscode.window.activeTextEditor?.document.getText()
+    if (openapiText !== undefined) {
+      const openapiTitle = JSON.parse(openapiText).info.title as string
+      this._panel.title = openapiTitle ? openapiTitle : 'OpenAPI Specification'
+      this._panel.webview.postMessage(openapiText)
+    }
   }
 
   public dispose() {
@@ -116,9 +102,23 @@ export class OpenApiPanel {
   }
 
   private _update() {
-    this._panel.title = 'OpenAPI Specification'
     this._panel.webview.html = this._getHtmlForWebview(this._panel.webview)
     this.updateOpenApi()
+  }
+
+  private _getNonce() {
+    const nonce = crypto.randomBytes(32).toString('base64')
+    return nonce
+  }
+
+  public static _getWebviewOptions(
+    extensionUri: vscode.Uri
+  ): vscode.WebviewOptions | vscode.WebviewPanelOptions {
+    return {
+      enableScripts: true,
+      retainContextWhenHidden: true,
+      localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'assets')],
+    }
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
@@ -131,7 +131,7 @@ export class OpenApiPanel {
 
     // And the uri we use to load this script in the webview
     const scriptWebviewUri = webview.asWebviewUri(scriptPathOnDisk)
-    const nonce = getNonce()
+    const nonce = this._getNonce()
 
     const panelTheme = {
       [vscode.ColorThemeKind.Light]: 'light',
@@ -174,21 +174,5 @@ export class OpenApiPanel {
         </script>
       </body>
     </html>`
-  }
-}
-
-function getNonce() {
-  const nonce = crypto.randomBytes(32).toString('base64')
-  return nonce
-}
-
-export function getWebviewOptions(
-  extensionUri: vscode.Uri
-): vscode.WebviewOptions {
-  return {
-    // Enable javascript in the webview
-    enableScripts: true,
-    // And restrict the webview to only loading content from extension `assets` directory
-    localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'assets')],
   }
 }

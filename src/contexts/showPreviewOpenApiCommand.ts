@@ -4,18 +4,17 @@ import {
   TextDocumentChangeEvent,
   TextEditor,
   Uri,
-  WebviewPanel,
   window,
   workspace,
 } from 'vscode'
-import { OpenApiPanel, getWebviewOptions } from '../webviews/openApiPanel'
+import { OpenApiPanel } from '../webviews/openApiPanel'
 import { ActiveEditorTracker } from '../utils/activeEditorTracker'
 
 export function RegisterCommand(context: ExtensionContext) {
-  showPreviewOpenApi(context)
+  _showPreviewOpenApi(context)
 }
 
-function showPreviewOpenApi(context: ExtensionContext) {
+function _showPreviewOpenApi(context: ExtensionContext) {
   const command = 'openapi.showPreviewOpenApi'
   const commandHandler = (uri: Uri) => {
     OpenApiPanel.createOrShow(context.extensionUri)
@@ -37,17 +36,6 @@ function showPreviewOpenApi(context: ExtensionContext) {
   const activeEditor = window.activeTextEditor
   if (activeEditor) {
     _setContext(activeEditor.document.getText())
-  }
-
-  if (window.registerWebviewPanelSerializer) {
-    // Make sure we register a serializer in activation event
-    window.registerWebviewPanelSerializer(OpenApiPanel.viewType, {
-      async deserializeWebviewPanel(webviewPanel: WebviewPanel, state: any) {
-        // Reset the webview options so we use latest uri for `localResourceRoots`.
-        webviewPanel.webview.options = getWebviewOptions(context.extensionUri)
-        OpenApiPanel.revive(webviewPanel, context.extensionUri)
-      },
-    })
   }
 }
 
