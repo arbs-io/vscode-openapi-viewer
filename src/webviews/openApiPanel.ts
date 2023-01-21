@@ -1,59 +1,63 @@
-import * as vscode from 'vscode'
-import * as crypto from 'crypto'
+import {
+  ColorThemeKind,
+  Disposable,
+  Uri,
+  ViewColumn,
+  Webview,
+  WebviewOptions,
+  WebviewPanel,
+  WebviewPanelOptions,
+  window,
+} from 'vscode'
+import { randomBytes } from 'crypto'
 
 export class OpenApiPanel {
   public static currentPanel: OpenApiPanel | undefined
   public static readonly _viewType = 'OpenApiPanel'
-  private readonly _panel: vscode.WebviewPanel
-  private readonly _extensionUri: vscode.Uri
-  private _disposables: vscode.Disposable[] = []
+  private readonly _panel: WebviewPanel
+  private readonly _extensionUri: Uri
+  private _disposables: Disposable[] = []
 
-  public static createOrShow(extensionUri: vscode.Uri) {
-    const column = vscode.window.activeTextEditor
-      ? vscode.window.activeTextEditor.viewColumn
-      : undefined
+  public static createOrShow(extensionUri: Uri) {
+    const columnBeside = ViewColumn.Beside
 
-    // If we already have a panel, show it.
     if (OpenApiPanel.currentPanel) {
-      OpenApiPanel.currentPanel._panel.reveal(column)
+      OpenApiPanel.currentPanel._panel.reveal(columnBeside)
       return
     }
 
     // Otherwise, create a new panel.
-    const panel = vscode.window.createWebviewPanel(
+    const panel = window.createWebviewPanel(
       OpenApiPanel._viewType,
-      '[Preview] ', // + openapiUri.scheme,
-      column || vscode.ViewColumn.Beside,
+      '[Preview] ',
+      columnBeside,
       OpenApiPanel._getWebviewOptions(extensionUri)
     )
 
     OpenApiPanel.currentPanel = new OpenApiPanel(panel, extensionUri)
   }
 
-  public static revive(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
+  public static revive(panel: WebviewPanel, extensionUri: Uri) {
     OpenApiPanel.currentPanel = new OpenApiPanel(panel, extensionUri)
   }
 
-  private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
+  private constructor(panel: WebviewPanel, extensionUri: Uri) {
     this._panel = panel
     this._extensionUri = extensionUri
 
     this._update() // Set the webview's initial html content
     this._setPanelIcon() // Icon
 
-    // Listen for when the panel is disposed
-    // This happens when the user closes the panel or when the panel is closed programmatically
     this._panel.onDidDispose(() => this.dispose(), null, this._disposables)
 
-    // Handle messages from the webview
     this._panel.webview.onDidReceiveMessage(
       (message) => {
         switch (message.command) {
           case 'alert':
-            vscode.window.showErrorMessage(message.text)
+            window.showErrorMessage(message.text)
             return
           case 'info':
-            vscode.window.showInformationMessage(message.text)
+            window.showInformationMessage(message.text)
             return
           default:
             console.log(message.text)
@@ -64,13 +68,13 @@ export class OpenApiPanel {
       this._disposables
     )
 
-    vscode.window.onDidChangeActiveColorTheme((theme) => {
+    window.onDidChangeActiveColorTheme((theme) => {
       this._update()
     })
   }
 
   public updateOpenApi() {
-    const openapiText = vscode.window.activeTextEditor?.document.getText()
+    const openapiText = window.activeTextEditor?.document.getText()
     if (openapiText !== undefined) {
       const openapiTitle = JSON.parse(openapiText).info.title as string
       this._panel.title = openapiTitle ? openapiTitle : 'OpenAPI Specification'
@@ -93,7 +97,7 @@ export class OpenApiPanel {
   }
 
   private _setPanelIcon() {
-    const iconPathOnDisk = vscode.Uri.joinPath(
+    const iconPathOnDisk = Uri.joinPath(
       this._extensionUri,
       'assets',
       'openapi-icon-light.png'
@@ -107,23 +111,23 @@ export class OpenApiPanel {
   }
 
   private _getNonce() {
-    const nonce = crypto.randomBytes(32).toString('base64')
+    const nonce = randomBytes(32).toString('base64')
     return nonce
   }
 
   public static _getWebviewOptions(
-    extensionUri: vscode.Uri
-  ): vscode.WebviewOptions | vscode.WebviewPanelOptions {
+    extensionUri: Uri
+  ): WebviewOptions | WebviewPanelOptions {
     return {
       enableScripts: true,
       retainContextWhenHidden: true,
-      localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'assets')],
+      localResourceRoots: [Uri.joinPath(extensionUri, 'assets')],
     }
   }
 
-  private _getHtmlForWebview(webview: vscode.Webview) {
+  private _getHtmlForWebview(webview: Webview) {
     // Local path to main script run in the webview
-    const scriptPathOnDisk = vscode.Uri.joinPath(
+    const scriptPathOnDisk = Uri.joinPath(
       this._extensionUri,
       'assets',
       'rapidoc-min.js'
@@ -134,11 +138,11 @@ export class OpenApiPanel {
     const nonce = this._getNonce()
 
     const panelTheme = {
-      [vscode.ColorThemeKind.Light]: 'light',
-      [vscode.ColorThemeKind.Dark]: 'dark',
-      [vscode.ColorThemeKind.HighContrast]: 'dark',
-      [vscode.ColorThemeKind.HighContrastLight]: 'light',
-    }[vscode.window.activeColorTheme.kind]
+      [ColorThemeKind.Light]: 'light',
+      [ColorThemeKind.Dark]: 'dark',
+      [ColorThemeKind.HighContrast]: 'dark',
+      [ColorThemeKind.HighContrastLight]: 'light',
+    }[window.activeColorTheme.kind]
 
     const bgColor = {
       light: '#F3F3F3',
