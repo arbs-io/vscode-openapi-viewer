@@ -1,6 +1,6 @@
 import { ExtensionContext } from 'vscode'
-import { registerShowPreviewOpenApi } from './contexts/registerShowPreviewOpenApi'
+import { registerShowPreviewOpenApiCommand } from './contexts/registerShowPreviewOpenApiCommand'
 
 export function activate(context: ExtensionContext) {
-  registerShowPreviewOpenApi(context)
+  registerShowPreviewOpenApiCommand(context)
 }
