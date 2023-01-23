@@ -10,7 +10,7 @@ import {
 import { OpenApiPanel } from '../webviews/openApiPanel'
 import { ActiveEditorTracker } from '../utils/activeEditorTracker'
 
-export function registerShowPreviewOpenApi(context: ExtensionContext) {
+export function registerShowPreviewOpenApiCommand(context: ExtensionContext) {
   _registerCommand(context)
 }
 
