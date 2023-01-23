@@ -10,11 +10,11 @@ import {
 import { OpenApiPanel } from '../webviews/openApiPanel'
 import { ActiveEditorTracker } from '../utils/activeEditorTracker'
 
-export function RegisterCommand(context: ExtensionContext) {
-  _showPreviewOpenApi(context)
+export function registerShowPreviewOpenApi(context: ExtensionContext) {
+  _registerCommand(context)
 }
 
-function _showPreviewOpenApi(context: ExtensionContext) {
+function _registerCommand(context: ExtensionContext) {
   const command = 'openapi.showPreviewOpenApi'
   const commandHandler = (uri: Uri) => {
     OpenApiPanel.createOrShow(context.extensionUri)

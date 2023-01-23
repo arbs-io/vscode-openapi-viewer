@@ -1,6 +1,5 @@
 import {
   ColorThemeKind,
-  Disposable,
   Uri,
   ViewColumn,
   Webview,
@@ -10,13 +9,13 @@ import {
   window,
 } from 'vscode'
 import { randomBytes } from 'crypto'
+import { Disposable } from '../utils/dispose'
 
-export class OpenApiPanel {
+export class OpenApiPanel extends Disposable {
   public static currentPanel: OpenApiPanel | undefined
   public static readonly _viewType = 'OpenApiPanel'
   private readonly _panel: WebviewPanel
   private readonly _extensionUri: Uri
-  private _disposables: Disposable[] = []
 
   public static createOrShow(extensionUri: Uri) {
     const columnBeside = ViewColumn.Beside
@@ -42,11 +41,12 @@ export class OpenApiPanel {
   }
 
   private constructor(panel: WebviewPanel, extensionUri: Uri) {
+    super()
     this._panel = panel
     this._extensionUri = extensionUri
 
-    this._update() // Set the webview's initial html content
-    this._setPanelIcon() // Icon
+    this._update()
+    this._setPanelIcon()
 
     this._panel.onDidDispose(() => this.dispose(), null, this._disposables)
 
