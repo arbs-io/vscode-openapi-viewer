@@ -58,10 +58,14 @@ function _handleDidChangeTextDocument(event: TextDocumentChangeEvent): void {
 }
 
 function _setContext(text: string): void {
-  const openApiJson = JSON.parse(text)
-  if (openApiJson['openapi'] || openApiJson['swagger']) {
-    commands.executeCommand('setContext', 'openapi.isValid', true)
-  } else {
+  try {
+    const openApiJson = JSON.parse(text)
+    if (openApiJson['openapi'] || openApiJson['swagger']) {
+      commands.executeCommand('setContext', 'openapi.isValid', true)
+    } else {
+      commands.executeCommand('setContext', 'openapi.isValid', false)
+    }
+  } catch (error) {
     commands.executeCommand('setContext', 'openapi.isValid', false)
   }
 }
