@@ -7,7 +7,7 @@ import {
   window,
   workspace,
 } from 'vscode'
-import { OpenApiPanel } from '../webviews/openApiPanel'
+import { OpenApiPanel } from '../panels/openApiPanel'
 import { ActiveEditorTracker } from '../utils/activeEditorTracker'
 
 export function registerShowPreviewOpenApiCommand(context: ExtensionContext) {
