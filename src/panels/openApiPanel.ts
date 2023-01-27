@@ -51,7 +51,7 @@ export class OpenApiPanel extends Disposable {
     this._panel.onDidDispose(() => this.dispose(), null, this._disposables)
 
     this._panel.webview.onDidReceiveMessage(
-      (message) => {
+      (message: { command: any; text: any }) => {
         switch (message.command) {
           case 'alert':
             window.showErrorMessage(message.text)
