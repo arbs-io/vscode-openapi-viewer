@@ -44,9 +44,3 @@ Pull requests are also very welcome since I can't always get around to fixing al
 This is a personal passion project, so my time is limited.
 
 Another way to help out is to [sponsor me on GitHub](https://github.com/sponsors/arbs-io).
-
-## **Copyright**
-
-Copyright 2021 - 2022 Api Studio, Inc.
-
-Licensed under the MIT License
