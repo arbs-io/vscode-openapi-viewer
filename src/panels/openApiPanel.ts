@@ -8,7 +8,7 @@ import {
   WebviewPanelOptions,
   window,
 } from 'vscode'
-import { randomBytes } from 'crypto'
+import CryptoJS from 'crypto-js'
 import { Disposable } from '../utils/dispose'
 
 export class OpenApiPanel extends Disposable {
@@ -77,7 +77,7 @@ export class OpenApiPanel extends Disposable {
     const openapiText = window.activeTextEditor?.document.getText()
     if (openapiText !== undefined) {
       const openapiTitle = JSON.parse(openapiText).info.title as string
-      this._panel.title = openapiTitle ? openapiTitle : 'OpenAPI Specification'
+      this._panel.title = openapiTitle || 'OpenAPI Specification'
       this._panel.webview.postMessage(openapiText)
     }
   }
@@ -111,7 +111,7 @@ export class OpenApiPanel extends Disposable {
   }
 
   private _getNonce() {
-    const nonce = randomBytes(32).toString('base64')
+    const nonce = CryptoJS.lib.WordArray.random(32).toString()
     return nonce
   }
 
