@@ -107,7 +107,7 @@ export class OpenApiPanel extends Disposable {
     const iconPathOnDisk = Uri.joinPath(
       this._extensionUri,
       'assets',
-      'openapi-icon-light.png'
+      'openapi-icon-color.png'
     )
     this._panel.iconPath = iconPathOnDisk
   }

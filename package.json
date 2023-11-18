@@ -72,11 +72,11 @@
     "commands": [
       {
         "command": "openapi.showPreviewOpenApi",
-        "title": "Show a rendered version of the openapi specification",
+        "title": "Open OpenAPI Specification",
         "category": "openapi",
         "icon": {
-          "light": "assets/openapi-icon-light.png",
-          "dark": "assets/openapi-icon-dark.png"
+          "light": "assets/openapi-icon-black.png",
+          "dark": "assets/openapi-icon-white.png"
         }
       }
     ]
