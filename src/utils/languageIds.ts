@@ -1,8 +1,9 @@
 import { TextDocument, languages } from 'vscode'
 
-export const json = 'json'
-export const openApiLanguageModes = [json]
+const json = 'json'
+const yml = 'yml'
+const yaml = 'yaml'
 
 export function isSupportedLanguageMode(doc: TextDocument) {
-  return languages.match([json], doc) > 0
+  return languages.match([json, yml, yaml], doc) > 0
 }
