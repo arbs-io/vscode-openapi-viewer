@@ -35,7 +35,9 @@
     "Visualization"
   ],
   "activationEvents": [
-    "onLanguage:json"
+    "onLanguage:json",
+    "onLanguage:yml",
+    "onLanguage:yaml"
   ],
   "main": "./out/extension.js",
   "browser": "./out/extension.js",
