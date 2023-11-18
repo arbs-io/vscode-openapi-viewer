@@ -1,5 +1,6 @@
 import {
   ColorThemeKind,
+  TextDocument,
   Uri,
   ViewColumn,
   Webview,
@@ -9,7 +10,9 @@ import {
   window,
 } from 'vscode'
 import CryptoJS from 'crypto-js'
+import YAML from 'yaml'
 import { Disposable } from '../utils/dispose'
+import { getOpenApiObject } from '../utils/documentOpenApi'
 
 export class OpenApiPanel extends Disposable {
   public static currentPanel: OpenApiPanel | undefined
@@ -73,12 +76,16 @@ export class OpenApiPanel extends Disposable {
     })
   }
 
-  public updateOpenApi() {
-    const openapiText = window.activeTextEditor?.document.getText()
-    if (openapiText !== undefined) {
-      const openapiTitle = JSON.parse(openapiText).info.title as string
+  public updateOpenApiSpecification() {
+    if (!window.activeTextEditor?.document) return
+
+    const documentOpenApi = getOpenApiObject(window.activeTextEditor.document)
+    const textOpenApi = JSON.stringify(documentOpenApi)
+
+    if (textOpenApi !== undefined) {
+      const openapiTitle = JSON.parse(textOpenApi).info.title as string
       this._panel.title = openapiTitle || 'OpenAPI Specification'
-      this._panel.webview.postMessage(openapiText)
+      this._panel.webview.postMessage(textOpenApi)
     }
   }
 
@@ -107,7 +114,7 @@ export class OpenApiPanel extends Disposable {
 
   private _update() {
     this._panel.webview.html = this._getHtmlForWebview(this._panel.webview)
-    this.updateOpenApi()
+    this.updateOpenApiSpecification()
   }
 
   private _getNonce() {
