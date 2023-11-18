@@ -46,13 +46,25 @@
         "extensions": [
           ".json"
         ]
+      },
+      {
+        "id": "yml",
+        "extensions": [
+          ".yml"
+        ]
+      },
+      {
+        "id": "yaml",
+        "extensions": [
+          ".yaml"
+        ]
       }
     ],
     "menus": {
       "editor/title": [
         {
           "command": "openapi.showPreviewOpenApi",
-          "when": "editorLangId == json && openapi.isValid",
+          "when": "openapi.isValid",
           "group": "navigation"
         }
       ]
@@ -70,9 +82,9 @@
     ]
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.2.1",
     "@types/node": "^20.9.2",
     "@types/vscode": "^1.74.0",
-    "@types/crypto-js": "^4.2.1",
     "@typescript-eslint/eslint-plugin": "^6.11.0",
     "@typescript-eslint/parser": "^6.11.0",
     "@vscode/vsce": "^2.22.0",
@@ -81,6 +93,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "crypto-js": "^4.2.0"
+    "crypto-js": "^4.2.0",
+    "yaml": "^2.3.4"
   }
 }
