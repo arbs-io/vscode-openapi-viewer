@@ -61,6 +61,8 @@ function _handleDidChangeTextDocument(event: TextDocumentChangeEvent): void {
 
 function _setContext(document: TextDocument): void {
   try {
+    if (document.fileName == 'exthost') return //Ignore logs and output
+
     const isValid = isValidOpenApi(document)
     commands.executeCommand('setContext', 'openapi.isValid', isValid)
   } catch (error) {
