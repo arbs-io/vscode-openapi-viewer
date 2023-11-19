@@ -2,7 +2,7 @@
   "name": "vscode-openapi-viewer",
   "displayName": "vscode-openapi-viewer",
   "description": "A vscode extension to view openapi specifications",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "publisher": "AndrewButson",
   "icon": "images/logo_128x128.png",
   "private": true,
@@ -17,6 +17,15 @@
   "engines": {
     "vscode": "^1.74.0"
   },
+  "scripts": {
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+    "test-compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "deploy": "vsce publish --yarn"
+  },
   "categories": [
     "Other",
     "Programming Languages",
@@ -26,7 +35,9 @@
     "Visualization"
   ],
   "activationEvents": [
-    "onLanguage:json"
+    "onLanguage:json",
+    "onLanguage:yml",
+    "onLanguage:yaml"
   ],
   "main": "./out/extension.js",
   "browser": "./out/extension.js",
@@ -37,13 +48,25 @@
         "extensions": [
           ".json"
         ]
+      },
+      {
+        "id": "yml",
+        "extensions": [
+          ".yml"
+        ]
+      },
+      {
+        "id": "yaml",
+        "extensions": [
+          ".yaml"
+        ]
       }
     ],
     "menus": {
       "editor/title": [
         {
           "command": "openapi.showPreviewOpenApi",
-          "when": "editorLangId == json && openapi.isValid",
+          "when": "!activeEditorIsReadonly && openapi.isValid",
           "group": "navigation"
         }
       ]
@@ -51,7 +74,7 @@
     "commands": [
       {
         "command": "openapi.showPreviewOpenApi",
-        "title": "Show a rendered version of the openapi specification",
+        "title": "Open OpenAPI Specification",
         "category": "openapi",
         "icon": {
           "light": "assets/openapi-icon-light.png",
@@ -60,27 +83,19 @@
       }
     ]
   },
-  "scripts": {
-    "vscode:prepublish": "npm run esbuild-base -- --minify",
-    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
-    "esbuild": "npm run esbuild-base -- --sourcemap",
-    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
-    "test-compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "deploy": "vsce publish --yarn"
-  },
   "devDependencies": {
-    "@types/node": "^20.8.7",
+    "@types/crypto-js": "^4.2.1",
+    "@types/node": "^20.9.2",
     "@types/vscode": "^1.74.0",
-    "@types/crypto-js": "^4.1.3",
-    "@typescript-eslint/eslint-plugin": "^6.8.0",
-    "@typescript-eslint/parser": "^6.8.0",
-    "@vscode/vsce": "^2.21.1",
+    "@typescript-eslint/eslint-plugin": "^6.11.0",
+    "@typescript-eslint/parser": "^6.11.0",
+    "@vscode/vsce": "^2.22.0",
     "esbuild": "^0.19.5",
-    "eslint": "^8.52.0",
+    "eslint": "^8.54.0",
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "crypto-js": "^4.1.1"
+    "crypto-js": "^4.2.0",
+    "yaml": "^2.3.4"
   }
 }

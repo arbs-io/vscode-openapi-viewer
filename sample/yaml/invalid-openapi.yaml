@@ -1,0 +1,10 @@
+openinvalid: 3.0.0
+info:
+  title: fdsaf
+  version: 1.0.0
+paths:
+  /get-something:
+    get:
+      responses:
+        default:
+          description: Default error sample response

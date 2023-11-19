@@ -1,0 +1,10 @@
+openapi: 3.0.0
+info:
+  title: Empty Specification
+  version: 1.0.0
+paths:
+  /get-something:
+    get:
+      responses:
+        default:
+          description: Default error sample response

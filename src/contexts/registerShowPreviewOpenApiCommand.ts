@@ -1,6 +1,7 @@
 import {
   commands,
   ExtensionContext,
+  TextDocument,
   TextDocumentChangeEvent,
   TextEditor,
   Uri,
@@ -9,6 +10,7 @@ import {
 } from 'vscode'
 import { OpenApiPanel } from '../panels/openApiPanel'
 import { ActiveEditorTracker } from '../utils/activeEditorTracker'
+import { isValidOpenApi } from '../utils/documentOpenApi'
 
 export function registerShowPreviewOpenApiCommand(context: ExtensionContext) {
   _registerCommand(context)
@@ -18,7 +20,7 @@ function _registerCommand(context: ExtensionContext) {
   const command = 'openapi.showPreviewOpenApi'
   const commandHandler = (uri: Uri) => {
     OpenApiPanel.createOrShow(context.extensionUri)
-    OpenApiPanel.currentPanel?.updateOpenApi()
+    OpenApiPanel.currentPanel?.updateOpenApiSpecification()
   }
   context.subscriptions.push(commands.registerCommand(command, commandHandler))
 
@@ -35,13 +37,13 @@ function _registerCommand(context: ExtensionContext) {
 
   const activeEditor = window.activeTextEditor
   if (activeEditor) {
-    _setContext(activeEditor.document.getText())
+    _setContext(activeEditor.document)
   }
 }
 
 function _handleDidChangeActiveEditor(e: TextEditor | undefined): any {
   if (e !== undefined) {
-    _setContext(e.document.getText())
+    _setContext(e.document)
   }
 }
 
@@ -53,18 +55,16 @@ function _handleDidChangeTextDocument(event: TextDocumentChangeEvent): void {
   changeTimeout = setInterval(function () {
     clearTimeout(changeTimeout)
     changeTimeout = undefined
-    _setContext(event.document.getText())
+    _setContext(event.document)
   }, 500)
 }
 
-function _setContext(text: string): void {
+function _setContext(document: TextDocument): void {
   try {
-    const openApiJson = JSON.parse(text)
-    if (openApiJson['openapi'] || openApiJson['swagger']) {
-      commands.executeCommand('setContext', 'openapi.isValid', true)
-    } else {
-      commands.executeCommand('setContext', 'openapi.isValid', false)
-    }
+    if (document.fileName == 'exthost') return //Ignore logs and output
+
+    const isValid = isValidOpenApi(document)
+    commands.executeCommand('setContext', 'openapi.isValid', isValid)
   } catch (error) {
     commands.executeCommand('setContext', 'openapi.isValid', false)
   }
