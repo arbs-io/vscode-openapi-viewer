@@ -77,8 +77,8 @@
         "title": "Open OpenAPI Specification",
         "category": "openapi",
         "icon": {
-          "light": "assets/openapi-icon-black.png",
-          "dark": "assets/openapi-icon-white.png"
+          "light": "assets/openapi-icon-light.png",
+          "dark": "assets/openapi-icon-dark.png"
         }
       }
     ]

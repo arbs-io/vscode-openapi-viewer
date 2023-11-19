@@ -14,7 +14,7 @@
 
 ## What is Visual Studio Code OpenAPI viewer?
 
-This extension allows developers and architects to view OpenAPI specifications visually, visually, and intuitively. It provides a preview of the specification in the form of an interactive document, which can be used to test and debug APIs. The preview can be accessed from within the Visual Studio editor, making it convenient for developers to view and edit the specification as they work on their code.
+This extension allows users to view OpenAPI specifications. The extension support both `json` and `yaml` format. It provides a preview of the specification in the form of an interactive document, which can be used to test and debug APIs. The preview can be accessed from within the Visual Studio editor, making it convenient for developers to view and edit the specification as they work on their code.
 
 The extension is handy for developers and architects working on API-based projects, allowing them to see how their APIs will behave and interact with other components. It can also be used to generate documentation for APIs, which can be helpful for developers who are working on projects with multiple teams or sharing APIs with external clients.
 
