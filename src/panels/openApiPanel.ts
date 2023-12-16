@@ -1,6 +1,5 @@
 import {
   ColorThemeKind,
-  TextDocument,
   Uri,
   ViewColumn,
   Webview,
@@ -10,7 +9,6 @@ import {
   window,
 } from 'vscode'
 import CryptoJS from 'crypto-js'
-import YAML from 'yaml'
 import { Disposable } from '../utils/dispose'
 import { getOpenApiObject } from '../utils/documentOpenApi'
 
