@@ -2,7 +2,9 @@ import { TextEditor, EventEmitter, window } from 'vscode'
 import { Disposable } from './dispose'
 import { isSupportedLanguageMode } from './languageIds'
 
+// Singleton pattern
 export class ActiveEditorTracker extends Disposable {
+  private static instance: ActiveEditorTracker
   private _activeEditor: TextEditor | undefined
 
   private readonly _onDidChangeActiveEditor = this._register(
@@ -10,7 +12,7 @@ export class ActiveEditorTracker extends Disposable {
   )
   public readonly onDidChangeActiveEditor = this._onDidChangeActiveEditor.event
 
-  public constructor() {
+  private constructor() {
     super()
     window.onDidChangeActiveTextEditor(
       this._onDidChangeActiveTextEditor,
@@ -18,19 +20,7 @@ export class ActiveEditorTracker extends Disposable {
       this._disposables
     )
     window.onDidChangeVisibleTextEditors(
-      () => {
-        // Make sure the active editor is still in the visible set.
-        // This can happen if the output view is focused and the last active TS file is closed
-        if (this._activeEditor) {
-          if (
-            !window.visibleTextEditors.some(
-              (visibleEditor) => visibleEditor === this._activeEditor
-            )
-          ) {
-            this._onDidChangeActiveTextEditor(undefined)
-          }
-        }
-      },
+      () => this.validateActiveEditor(),
       this,
       this._disposables
     )
@@ -38,22 +28,30 @@ export class ActiveEditorTracker extends Disposable {
     this._onDidChangeActiveTextEditor(window.activeTextEditor)
   }
 
+  // Singleton instance getter
+  public static getInstance(): ActiveEditorTracker {
+    if (!ActiveEditorTracker.instance) {
+      ActiveEditorTracker.instance = new ActiveEditorTracker()
+    }
+    return ActiveEditorTracker.instance
+  }
+
   public get activeEditor(): TextEditor | undefined {
     return this._activeEditor
   }
 
-  private _onDidChangeActiveTextEditor(editor: TextEditor | undefined): any {
+  private async _onDidChangeActiveTextEditor(
+    editor: TextEditor | undefined
+  ): Promise<void> {
     if (editor === this._activeEditor) {
       return
     }
 
     if (editor && !editor.viewColumn) {
-      // viewColumn is undefined for the debug/output panel, but we still want
-      // to show the version info for the previous editor
       return
     }
 
-    if (editor && this._isManagedFile(editor)) {
+    if (editor && (await this._isManagedFile(editor))) {
       this._activeEditor = editor
     } else {
       this._activeEditor = undefined
@@ -61,7 +59,17 @@ export class ActiveEditorTracker extends Disposable {
     this._onDidChangeActiveEditor.fire(this._activeEditor)
   }
 
-  private _isManagedFile(editor: TextEditor): boolean {
+  private async _isManagedFile(editor: TextEditor): Promise<boolean> {
     return isSupportedLanguageMode(editor.document)
+  }
+
+  // Facade pattern
+  private validateActiveEditor(): void {
+    if (
+      this._activeEditor &&
+      !window.visibleTextEditors.includes(this._activeEditor)
+    ) {
+      this._onDidChangeActiveTextEditor(undefined)
+    }
   }
 }
