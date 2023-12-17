@@ -12,60 +12,81 @@ import { OpenApiPanel } from '../panels/openApiPanel'
 import { ActiveEditorTracker } from '../utils/activeEditorTracker'
 import { isValidOpenApi } from '../utils/documentOpenApi'
 
-export function registerShowPreviewOpenApiCommand(context: ExtensionContext) {
-  _registerCommand(context)
-}
+// Singleton pattern for command registration
+class CommandRegistration {
+  private static instance: CommandRegistration
+  private activeEditorTracker: ActiveEditorTracker
+  private changeTimeout: string | number | NodeJS.Timeout | undefined
 
-function _registerCommand(context: ExtensionContext) {
-  const command = 'openapi.showPreviewOpenApi'
-  const commandHandler = (uri: Uri) => {
-    OpenApiPanel.createOrShow(context.extensionUri)
-    OpenApiPanel.currentPanel?.updateOpenApiSpecification()
+  private constructor(private context: ExtensionContext) {
+    this.activeEditorTracker = ActiveEditorTracker.getInstance()
   }
-  context.subscriptions.push(commands.registerCommand(command, commandHandler))
 
-  const activeEditorTracker = new ActiveEditorTracker()
-  context.subscriptions.push(
-    activeEditorTracker.onDidChangeActiveEditor((e) =>
-      _handleDidChangeActiveEditor(e)
+  public static getInstance(context: ExtensionContext): CommandRegistration {
+    if (!CommandRegistration.instance) {
+      CommandRegistration.instance = new CommandRegistration(context)
+    }
+    return CommandRegistration.instance
+  }
+
+  public registerCommand(): void {
+    const command = 'openapi.showPreviewOpenApi'
+    const commandHandler = (uri: Uri) => {
+      OpenApiPanel.createOrShow(this.context.extensionUri)
+      OpenApiPanel.currentPanel?.updateOpenApiSpecification()
+    }
+    this.context.subscriptions.push(
+      commands.registerCommand(command, commandHandler)
     )
-  )
 
-  context.subscriptions.push(
-    workspace.onDidChangeTextDocument((e) => _handleDidChangeTextDocument(e))
-  )
+    this.context.subscriptions.push(
+      this.activeEditorTracker.onDidChangeActiveEditor((e) =>
+        this.handleDidChangeActiveEditor(e)
+      )
+    )
 
-  const activeEditor = window.activeTextEditor
-  if (activeEditor) {
-    _setContext(activeEditor.document)
+    this.context.subscriptions.push(
+      workspace.onDidChangeTextDocument((e) =>
+        this.handleDidChangeTextDocument(e)
+      )
+    )
+
+    const activeEditor = window.activeTextEditor
+    if (activeEditor) {
+      this.setContext(activeEditor.document)
+    }
+  }
+
+  private handleDidChangeActiveEditor(e: TextEditor | undefined): any {
+    if (e !== undefined) {
+      this.setContext(e.document)
+    }
+  }
+
+  private handleDidChangeTextDocument(event: TextDocumentChangeEvent): void {
+    if (this.changeTimeout !== undefined) {
+      clearTimeout(this.changeTimeout)
+    }
+    this.changeTimeout = setInterval(() => {
+      clearTimeout(this.changeTimeout)
+      this.changeTimeout = undefined
+      this.setContext(event.document)
+    }, 500)
+  }
+
+  private setContext(document: TextDocument): void {
+    try {
+      if (document.fileName == 'exthost') return
+
+      const isValid = isValidOpenApi(document)
+      commands.executeCommand('setContext', 'openapi.isValid', isValid)
+    } catch (error) {
+      commands.executeCommand('setContext', 'openapi.isValid', false)
+    }
   }
 }
 
-function _handleDidChangeActiveEditor(e: TextEditor | undefined): any {
-  if (e !== undefined) {
-    _setContext(e.document)
-  }
-}
-
-let changeTimeout: string | number | NodeJS.Timeout | undefined
-function _handleDidChangeTextDocument(event: TextDocumentChangeEvent): void {
-  if (changeTimeout !== undefined) {
-    clearTimeout(changeTimeout)
-  }
-  changeTimeout = setInterval(function () {
-    clearTimeout(changeTimeout)
-    changeTimeout = undefined
-    _setContext(event.document)
-  }, 500)
-}
-
-function _setContext(document: TextDocument): void {
-  try {
-    if (document.fileName == 'exthost') return //Ignore logs and output
-
-    const isValid = isValidOpenApi(document)
-    commands.executeCommand('setContext', 'openapi.isValid', isValid)
-  } catch (error) {
-    commands.executeCommand('setContext', 'openapi.isValid', false)
-  }
+export function registerShowPreviewOpenApiCommand(context: ExtensionContext) {
+  const commandRegistration = CommandRegistration.getInstance(context)
+  commandRegistration.registerCommand()
 }
