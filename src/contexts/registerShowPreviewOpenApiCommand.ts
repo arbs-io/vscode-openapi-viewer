@@ -22,6 +22,7 @@ class CommandRegistration {
     this.activeEditorTracker = ActiveEditorTracker.getInstance()
   }
 
+  // Static method to get singleton instance
   public static getInstance(context: ExtensionContext): CommandRegistration {
     if (!CommandRegistration.instance) {
       CommandRegistration.instance = new CommandRegistration(context)
@@ -29,6 +30,7 @@ class CommandRegistration {
     return CommandRegistration.instance
   }
 
+  // Method to register command
   public registerCommand(): void {
     const command = 'openapi.showPreviewOpenApi'
     const commandHandler = (uri: Uri) => {
@@ -39,24 +41,27 @@ class CommandRegistration {
       commands.registerCommand(command, commandHandler)
     )
 
+    // Subscribe to active editor change event and push to context subscriptions
     this.context.subscriptions.push(
       this.activeEditorTracker.onDidChangeActiveEditor((e) =>
         this.handleDidChangeActiveEditor(e)
       )
     )
 
+    // Subscribe to document change event and push to context subscriptions
     this.context.subscriptions.push(
       workspace.onDidChangeTextDocument((e) =>
         this.handleDidChangeTextDocument(e)
       )
     )
 
-    const activeEditor = window.activeTextEditor
+    const activeEditor = window.activeTextEditor // Get active text editor
     if (activeEditor) {
       this.setContext(activeEditor.document)
     }
   }
 
+  // Handler for active editor change event
   private handleDidChangeActiveEditor(e: TextEditor | undefined): any {
     if (e !== undefined) {
       this.setContext(e.document)
