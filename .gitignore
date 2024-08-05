@@ -1,10 +1,24 @@
-.DS_Store
-npm-debug.log
-Thumbs.db
+# dependencies
 node_modules
-releases
+
+# yarn
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# eslint
+.eslintcache
+
+# misc
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea
+
+# cli
+dist
 out
-*/.vs/
-tsconfig.lsif.json
-*.lsif
-*.db
