@@ -23,7 +23,7 @@
     "esbuild": "yarn esbuild-base --sourcemap",
     "esbuild-watch": "yarn esbuild-base --sourcemap --watch",
     "test-compile": "tsc -p ./",
-    "deploy": "vsce publish --yarn"
+    "deploy": "vsce publish --no-yarn"
   },
   "categories": [
     "Other",
