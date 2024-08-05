@@ -13,7 +13,7 @@ import { Disposable } from '../utils/dispose'
 import { getOpenApiObject } from '../utils/documentOpenApi'
 
 export class OpenApiPanel extends Disposable {
-  public static currentPanel: OpenApiPanel | undefined
+  public static readonly currentPanel: OpenApiPanel | undefined
   public static readonly _viewType = 'OpenApiPanel'
   private readonly _panel: WebviewPanel
   private readonly _extensionUri: Uri
