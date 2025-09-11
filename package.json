@@ -96,6 +96,6 @@
   },
   "dependencies": {
     "crypto-js": "^4.2.0",
-    "yaml": "^2.5.0"
+    "yaml": "^2.8.1"
   }
 }
