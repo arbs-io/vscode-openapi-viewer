@@ -89,13 +89,13 @@
     "@types/vscode": "^1.78.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
-    "@vscode/vsce": "^2.31.1",
+    "@vscode/vsce": "^3.6.0",
     "esbuild": "^0.23.0",
     "eslint": "^9.8.0",
     "typescript": "^5.5.4"
   },
   "dependencies": {
     "crypto-js": "^4.2.0",
-    "yaml": "^2.5.0"
+    "yaml": "^2.8.1"
   }
 }
