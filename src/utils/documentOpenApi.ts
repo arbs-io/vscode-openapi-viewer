@@ -1,7 +1,7 @@
 // Import necessary modules
 import { TextDocument } from 'vscode'
 import YAML from 'yaml'
-import { jsonLangId, ymlLangId, yamlLangId } from './languageIds'
+import { jsonLangId, jsoncLangId, yamlLangId } from './languageIds'
 
 // Define an interface for the strategy pattern
 interface IParserStrategy {
@@ -43,8 +43,8 @@ class ParserFactory {
   static createParser(languageId: string): IParserStrategy | undefined {
     switch (languageId) {
       case jsonLangId:
+      case jsoncLangId:
         return new JsonParser()
-      case ymlLangId:
       case yamlLangId:
         return new YamlParser()
       default:
@@ -73,6 +73,8 @@ export function isValidOpenApi(document: TextDocument): boolean {
   const documentOpenApi = getOpenApiObject(document)
 
   if (!documentOpenApi) return false
+
+  if (typeof documentOpenApi !== 'object') return false
 
   if (documentOpenApi['openapi'] || documentOpenApi['swagger']) {
     return true

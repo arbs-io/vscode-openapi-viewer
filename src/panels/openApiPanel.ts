@@ -1,5 +1,6 @@
 import {
   ColorThemeKind,
+  TextDocument,
   Uri,
   ViewColumn,
   Webview,
@@ -8,7 +9,6 @@ import {
   WebviewPanelOptions,
   window,
 } from 'vscode'
-import CryptoJS from 'crypto-js'
 import { Disposable } from '../utils/dispose'
 import { getOpenApiObject } from '../utils/documentOpenApi'
 
@@ -17,12 +17,13 @@ export class OpenApiPanel extends Disposable {
   public static readonly _viewType = 'OpenApiPanel'
   private readonly _panel: WebviewPanel
   private readonly _extensionUri: Uri
+  private _document: TextDocument | undefined
 
   public static createOrShow(extensionUri: Uri) {
     const columnBeside = ViewColumn.Beside
 
     if (OpenApiPanel.currentPanel) {
-      OpenApiPanel.currentPanel._panel.reveal(columnBeside)
+      OpenApiPanel.currentPanel._panel.reveal(columnBeside, true)
       return
     }
 
@@ -30,7 +31,7 @@ export class OpenApiPanel extends Disposable {
     const panel = window.createWebviewPanel(
       OpenApiPanel._viewType,
       '[Preview] ',
-      columnBeside,
+      { viewColumn: columnBeside, preserveFocus: true },
       OpenApiPanel._getWebviewOptions(extensionUri)
     )
 
@@ -69,22 +70,29 @@ export class OpenApiPanel extends Disposable {
       this._disposables
     )
 
-    window.onDidChangeActiveColorTheme((theme) => {
-      this._update()
-    })
+    this._register(
+      window.onDidChangeActiveColorTheme(() => {
+        this._update()
+      })
+    )
   }
 
-  public updateOpenApiSpecification() {
-    if (!window.activeTextEditor?.document) return
+  // The document currently rendered in the preview
+  public get document(): TextDocument | undefined {
+    return this._document
+  }
 
-    const documentOpenApi = getOpenApiObject(window.activeTextEditor.document)
-    const textOpenApi = JSON.stringify(documentOpenApi)
+  public updateOpenApiSpecification(document?: TextDocument) {
+    const source = document ?? window.activeTextEditor?.document
+    if (!source) return
 
-    if (textOpenApi !== undefined) {
-      const openapiTitle = JSON.parse(textOpenApi).info.title as string
-      this._panel.title = openapiTitle || 'OpenAPI Specification'
-      this._panel.webview.postMessage(textOpenApi)
-    }
+    const documentOpenApi = getOpenApiObject(source)
+    if (documentOpenApi === undefined) return
+
+    this._document = source
+    this._panel.title =
+      (documentOpenApi?.info?.title as string) || 'OpenAPI Specification'
+    this._panel.webview.postMessage(JSON.stringify(documentOpenApi))
   }
 
   public dispose() {
@@ -92,13 +100,7 @@ export class OpenApiPanel extends Disposable {
 
     // Clean up our resources
     this._panel.dispose()
-
-    while (this._disposables.length) {
-      const x = this._disposables.pop()
-      if (x) {
-        x.dispose()
-      }
-    }
+    super.dispose()
   }
 
   private _setPanelIcon() {
@@ -112,12 +114,12 @@ export class OpenApiPanel extends Disposable {
 
   private _update() {
     this._panel.webview.html = this._getHtmlForWebview(this._panel.webview)
-    this.updateOpenApiSpecification()
+    this.updateOpenApiSpecification(this._document)
   }
 
   private _getNonce() {
-    const nonce = CryptoJS.lib.WordArray.random(32).toString()
-    return nonce
+    const bytes = globalThis.crypto.getRandomValues(new Uint8Array(32))
+    return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')
   }
 
   public static _getWebviewOptions(
@@ -142,6 +144,17 @@ export class OpenApiPanel extends Disposable {
     const scriptWebviewUri = webview.asWebviewUri(scriptPathOnDisk)
     const nonce = this._getNonce()
 
+    // Scripts are limited to the bundled renderer and the nonce'd inline
+    // loader. connect-src stays open so "Try" requests can reach any API.
+    const csp = [
+      `default-src 'none'`,
+      `script-src 'nonce-${nonce}'`,
+      `style-src ${webview.cspSource} 'unsafe-inline'`,
+      `img-src ${webview.cspSource} https: http: data:`,
+      `font-src ${webview.cspSource} https: data:`,
+      `connect-src https: http:`,
+    ].join('; ')
+
     const panelTheme = {
       [ColorThemeKind.Light]: 'light',
       [ColorThemeKind.Dark]: 'dark',
@@ -158,6 +171,7 @@ export class OpenApiPanel extends Disposable {
     <html>
       <head>
         <meta charset="utf-8">
+        <meta http-equiv="Content-Security-Policy" content="${csp}">
         <script nonce="${nonce}" src="${scriptWebviewUri}"></script>
       </head>
       <body>
@@ -174,7 +188,7 @@ export class OpenApiPanel extends Disposable {
           render-style = 'read'
           nav-bg-color = '${bgColor}'
         />
-        <script>
+        <script nonce="${nonce}">
           window.addEventListener('message', event => {
             let objSpec = JSON.parse(event.data);
             let docEl = document.getElementById("OpenApiPanel");
