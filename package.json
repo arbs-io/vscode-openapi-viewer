@@ -38,32 +38,11 @@
   "activationEvents": [
     "onStartupFinished",
     "onLanguage:json",
-    "onLanguage:yml",
     "onLanguage:yaml"
   ],
   "main": "./out/extension.js",
   "browser": "./out/extension.js",
   "contributes": {
-    "languages": [
-      {
-        "id": "json",
-        "extensions": [
-          ".json"
-        ]
-      },
-      {
-        "id": "yml",
-        "extensions": [
-          ".yml"
-        ]
-      },
-      {
-        "id": "yaml",
-        "extensions": [
-          ".yaml"
-        ]
-      }
-    ],
     "menus": {
       "editor/title": [
         {
@@ -83,11 +62,21 @@
           "dark": "assets/openapi-icon-dark.png"
         }
       }
-    ]
+    ],
+    "configuration": {
+      "title": "OpenAPI Viewer",
+      "properties": {
+        "openapi.preview.markdownLineBreaks": {
+          "type": "boolean",
+          "default": false,
+          "scope": "resource",
+          "markdownDescription": "Render single newlines in `description` fields as line breaks (GitHub style). By default descriptions follow CommonMark, as required by the OpenAPI Specification, where a single newline is rendered as a space."
+        }
+      }
+    }
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/crypto-js": "^4.2.2",
     "@types/node": "^26.6.4",
     "@types/vscode": "^1.140.0",
     "@vscode/vsce": "^4.0.0",
@@ -98,7 +87,6 @@
     "typescript-native": "npm:typescript@^7.0.2"
   },
   "dependencies": {
-    "crypto-js": "^4.2.0",
     "yaml": "^2.9.1"
   }
 }

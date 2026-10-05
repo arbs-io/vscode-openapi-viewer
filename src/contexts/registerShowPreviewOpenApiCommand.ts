@@ -16,7 +16,7 @@ import { isValidOpenApi } from '../utils/documentOpenApi'
 class CommandRegistration {
   private static instance: CommandRegistration
   private activeEditorTracker: ActiveEditorTracker
-  private changeTimeout: string | number | NodeJS.Timeout | undefined
+  private changeTimeout: ReturnType<typeof setTimeout> | undefined
 
   private constructor(private context: ExtensionContext) {
     this.activeEditorTracker = ActiveEditorTracker.getInstance()
@@ -33,9 +33,12 @@ class CommandRegistration {
   // Method to register command
   public registerCommand(): void {
     const command = 'openapi.showPreviewOpenApi'
-    const commandHandler = (uri: Uri) => {
+    const commandHandler = async (uri?: Uri) => {
+      const document = uri
+        ? await workspace.openTextDocument(uri)
+        : window.activeTextEditor?.document
       OpenApiPanel.createOrShow(this.context.extensionUri)
-      OpenApiPanel.currentPanel?.updateOpenApiSpecification()
+      OpenApiPanel.currentPanel?.updateOpenApiSpecification(document)
     }
     this.context.subscriptions.push(
       commands.registerCommand(command, commandHandler)
@@ -52,7 +55,8 @@ class CommandRegistration {
     this.context.subscriptions.push(
       workspace.onDidChangeTextDocument((e) =>
         this.handleDidChangeTextDocument(e)
-      )
+      ),
+      { dispose: () => clearTimeout(this.changeTimeout) }
     )
 
     const activeEditor = window.activeTextEditor // Get active text editor
@@ -68,14 +72,20 @@ class CommandRegistration {
     }
   }
 
+  // Debounce edits, then refresh the context key and the preview
   private handleDidChangeTextDocument(event: TextDocumentChangeEvent): void {
+    if (event.contentChanges.length === 0) return
     if (this.changeTimeout !== undefined) {
       clearTimeout(this.changeTimeout)
     }
-    this.changeTimeout = setInterval(() => {
-      clearTimeout(this.changeTimeout)
+    this.changeTimeout = setTimeout(() => {
       this.changeTimeout = undefined
       this.setContext(event.document)
+
+      const panel = OpenApiPanel.currentPanel
+      if (panel?.document === event.document) {
+        panel.updateOpenApiSpecification(event.document)
+      }
     }, 500)
   }
 
