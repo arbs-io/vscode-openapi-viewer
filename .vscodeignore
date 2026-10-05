@@ -23,6 +23,9 @@ Thumbs.db
 # samples and source
 samples/**
 scripts/**
+
+# outdated demo, not referenced by the README
+images/vscode-openapi-viewer.gif
 src/**
 
 # build output: ship only the bundle
