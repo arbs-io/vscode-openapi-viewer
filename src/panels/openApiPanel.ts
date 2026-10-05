@@ -15,17 +15,21 @@ import { getOpenApiObject } from '../utils/documentOpenApi'
 import { withHardLineBreaks } from '../utils/markdownLineBreaks'
 
 export class OpenApiPanel extends Disposable {
-  public static currentPanel: OpenApiPanel | undefined
+  private static _currentPanel: OpenApiPanel | undefined
   public static readonly _viewType = 'OpenApiPanel'
   private readonly _panel: WebviewPanel
   private readonly _extensionUri: Uri
   private _document: TextDocument | undefined
 
+  public static get currentPanel(): OpenApiPanel | undefined {
+    return OpenApiPanel._currentPanel
+  }
+
   public static createOrShow(extensionUri: Uri) {
     const columnBeside = ViewColumn.Beside
 
-    if (OpenApiPanel.currentPanel) {
-      OpenApiPanel.currentPanel._panel.reveal(columnBeside, true)
+    if (OpenApiPanel._currentPanel) {
+      OpenApiPanel._currentPanel._panel.reveal(columnBeside, true)
       return
     }
 
@@ -37,11 +41,11 @@ export class OpenApiPanel extends Disposable {
       OpenApiPanel._getWebviewOptions(extensionUri)
     )
 
-    OpenApiPanel.currentPanel = new OpenApiPanel(panel, extensionUri)
+    OpenApiPanel._currentPanel = new OpenApiPanel(panel, extensionUri)
   }
 
   public static revive(panel: WebviewPanel, extensionUri: Uri) {
-    OpenApiPanel.currentPanel = new OpenApiPanel(panel, extensionUri)
+    OpenApiPanel._currentPanel = new OpenApiPanel(panel, extensionUri)
   }
 
   private constructor(panel: WebviewPanel, extensionUri: Uri) {
@@ -111,7 +115,7 @@ export class OpenApiPanel extends Disposable {
   }
 
   public dispose() {
-    OpenApiPanel.currentPanel = undefined
+    OpenApiPanel._currentPanel = undefined
 
     // Clean up our resources
     this._panel.dispose()

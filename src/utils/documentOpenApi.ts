@@ -63,7 +63,9 @@ export function getOpenApiObject(document: TextDocument): any {
       return context.parse(documentText)
     }
     return undefined
-  } catch (error) {
+  } catch {
+    // Documents are parsed on every edit; invalid JSON/YAML is expected while
+    // typing and simply means the document is not (yet) an OpenAPI spec
     return undefined
   }
 }

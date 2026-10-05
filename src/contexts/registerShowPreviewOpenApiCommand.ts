@@ -15,10 +15,10 @@ import { isValidOpenApi } from '../utils/documentOpenApi'
 // Singleton pattern for command registration
 class CommandRegistration {
   private static instance: CommandRegistration
-  private activeEditorTracker: ActiveEditorTracker
+  private readonly activeEditorTracker: ActiveEditorTracker
   private changeTimeout: ReturnType<typeof setTimeout> | undefined
 
-  private constructor(private context: ExtensionContext) {
+  private constructor(private readonly context: ExtensionContext) {
     this.activeEditorTracker = ActiveEditorTracker.getInstance()
   }
 
@@ -41,18 +41,12 @@ class CommandRegistration {
       OpenApiPanel.currentPanel?.updateOpenApiSpecification(document)
     }
     this.context.subscriptions.push(
-      commands.registerCommand(command, commandHandler)
-    )
-
-    // Subscribe to active editor change event and push to context subscriptions
-    this.context.subscriptions.push(
+      commands.registerCommand(command, commandHandler),
+      // Re-evaluate the context key when the active editor changes
       this.activeEditorTracker.onDidChangeActiveEditor((e) =>
         this.handleDidChangeActiveEditor(e)
-      )
-    )
-
-    // Subscribe to document change event and push to context subscriptions
-    this.context.subscriptions.push(
+      ),
+      // Refresh the context key and preview when the document changes
       workspace.onDidChangeTextDocument((e) =>
         this.handleDidChangeTextDocument(e)
       ),
@@ -94,9 +88,10 @@ class CommandRegistration {
       if (document.fileName == 'exthost') return
 
       const isValid = isValidOpenApi(document)
-      commands.executeCommand('setContext', 'openapi.isValid', isValid)
-    } catch (error) {
-      commands.executeCommand('setContext', 'openapi.isValid', false)
+      void commands.executeCommand('setContext', 'openapi.isValid', isValid)
+    } catch {
+      // Any failure while inspecting the document means it cannot be previewed
+      void commands.executeCommand('setContext', 'openapi.isValid', false)
     }
   }
 }
