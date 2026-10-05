@@ -20,6 +20,26 @@ The extension is handy for developers and architects working on API-based projec
 
 The vscode-openapi-viewer extension is a valuable tool for developers and architects working with OpenAPI specifications. It provides a convenient and interactive way to preview, test, and debug APIs within Visual Studio.
 
+## Supported specifications
+
+| Specification | Default renderer (Scalar) | Legacy renderer (RapiDoc) |
+| --- | --- | --- |
+| OpenAPI 3.2 | ✅ | ⚠️ 3.2-only features are not shown |
+| OpenAPI 3.1 | ✅ | ✅ |
+| OpenAPI 3.0 | ✅ | ✅ |
+| Swagger 2.0 | ✅ | ✅ |
+
+OpenAPI 3.2 additions rendered by the preview include tag `summary` display names and nested tags (`parent`), the `QUERY` method and `additionalOperations`, `in: querystring` parameters, streaming `itemSchema`, example `dataValue`, and the OAuth 2.0 device authorization flow. See [samples/json/openapi-3.2-features.json](samples/json/openapi-3.2-features.json).
+
+The preview runs fully offline: telemetry, hosted fonts, the request proxy and AI features of the renderer are disabled, and "Test Request" calls go directly to your API.
+
+## Settings
+
+| Setting | Default | Description |
+| --- | --- | --- |
+| `openapi.preview.renderer` | `scalar` | `scalar` (OpenAPI 3.2 support) or `rapidoc` (the original renderer). |
+| `openapi.preview.markdownLineBreaks` | `false` | Render single newlines in `description` fields as line breaks (GitHub style) instead of CommonMark soft breaks. |
+
 ## Getting started
 
 1. First, open Visual Studio and go to the "Extensions" tab in the toolbar.
