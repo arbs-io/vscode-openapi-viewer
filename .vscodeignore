@@ -1,33 +1,29 @@
 # dependencies
-node_modules
+node_modules/**
 
 # yarn
 .yarnrc.yml
 .yarn/**
 
-# eslint
-.eslintcache
-
-# misc
-.DS_Store
-Thumbs.db
-
-# IDE
+# tooling
+.devcontainer/**
 .github/**
 .vscode/**
 .vscode-test/**
 .idea
-
-# cli
-dist
-
-# samples
-samples
-
-# source
-src/**
-out/test/**
-out/**/*.map
-.gitignore
+.eslintcache
+eslint.config.mjs
 tsconfig.json
-tslint.json
+.gitignore
+
+# misc
+**/.DS_Store
+Thumbs.db
+
+# samples and source
+samples/**
+src/**
+
+# build output: ship only the bundle
+out/**
+!out/extension.js

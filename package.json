@@ -15,14 +15,16 @@
     "url": "https://github.com/sponsors/arbs-io"
   },
   "engines": {
-    "vscode": "^1.78.0"
+    "vscode": "^1.140.0"
   },
   "scripts": {
     "vscode:prepublish": "yarn esbuild-base --minify",
-    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --target=es2020",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --target=es2022",
     "esbuild": "yarn esbuild-base --sourcemap",
     "esbuild-watch": "yarn esbuild-base --sourcemap --watch",
-    "test-compile": "tsc -p ./",
+    "typecheck": "node node_modules/typescript-native/bin/tsc -p ./ --noEmit",
+    "lint": "eslint src",
+    "package": "vsce package --no-yarn",
     "deploy": "vsce publish --no-yarn"
   },
   "categories": [
@@ -84,18 +86,19 @@
     ]
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/crypto-js": "^4.2.2",
-    "@types/node": "^24.10.0",
-    "@types/vscode": "^1.78.0",
-    "@typescript-eslint/eslint-plugin": "^8.46.3",
-    "@typescript-eslint/parser": "^8.46.3",
-    "@vscode/vsce": "^3.6.2",
-    "esbuild": "^0.25.12",
-    "eslint": "^9.39.1",
-    "typescript": "^5.9.3"
+    "@types/node": "^26.6.4",
+    "@types/vscode": "^1.140.0",
+    "@vscode/vsce": "^4.0.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.12.0",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.1",
+    "typescript-native": "npm:typescript@^7.0.2"
   },
   "dependencies": {
     "crypto-js": "^4.2.0",
-    "yaml": "^2.8.1"
+    "yaml": "^2.9.1"
   }
 }
