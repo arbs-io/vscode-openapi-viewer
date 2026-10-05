@@ -8,9 +8,11 @@ import {
   WebviewPanel,
   WebviewPanelOptions,
   window,
+  workspace,
 } from 'vscode'
 import { Disposable } from '../utils/dispose'
 import { getOpenApiObject } from '../utils/documentOpenApi'
+import { withHardLineBreaks } from '../utils/markdownLineBreaks'
 
 export class OpenApiPanel extends Disposable {
   public static currentPanel: OpenApiPanel | undefined
@@ -75,6 +77,14 @@ export class OpenApiPanel extends Disposable {
         this._update()
       })
     )
+
+    this._register(
+      workspace.onDidChangeConfiguration((e) => {
+        if (e.affectsConfiguration('openapi.preview')) {
+          this.updateOpenApiSpecification(this._document)
+        }
+      })
+    )
   }
 
   // The document currently rendered in the preview
@@ -86,8 +96,13 @@ export class OpenApiPanel extends Disposable {
     const source = document ?? window.activeTextEditor?.document
     if (!source) return
 
-    const documentOpenApi = getOpenApiObject(source)
+    let documentOpenApi = getOpenApiObject(source)
     if (documentOpenApi === undefined) return
+
+    const config = workspace.getConfiguration('openapi.preview', source)
+    if (config.get<boolean>('markdownLineBreaks', false)) {
+      documentOpenApi = withHardLineBreaks(documentOpenApi)
+    }
 
     this._document = source
     this._panel.title =

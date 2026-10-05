@@ -1,0 +1,21 @@
+openapi: 3.0.4
+info:
+  title: Markdown line breaks
+  version: 1.0.0
+  description: |
+    Toggle `openapi.preview.markdownLineBreaks` to compare rendering.
+    With the setting off, this line joins the one above (CommonMark soft break).
+
+    ```yaml
+    code: blocks
+    are: never altered
+    ```
+paths:
+  /foo:
+    get:
+      summary: Foo Summary
+      responses:
+        "200":
+          description: "This should be line 1\n
+            This should be line 2\n\n
+            This should be line 3"
