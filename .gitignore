@@ -22,3 +22,6 @@ Thumbs.db
 # cli
 dist
 out
+
+# packages
+*.vsix

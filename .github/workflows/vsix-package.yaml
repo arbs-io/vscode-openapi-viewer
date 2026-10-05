@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
   release:
     types:
       - created
@@ -20,9 +23,12 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: 22.x
+          node-version: 24.x
           cache: 'yarn'
-      - run: yarn install
+      - run: yarn install --immutable
+      - run: yarn lint
+      - run: yarn typecheck
+      - run: yarn package
       - name: Publish
         if: success() && startsWith(github.ref, 'refs/tags/') && matrix.os == 'ubuntu-latest'
         run: yarn deploy
