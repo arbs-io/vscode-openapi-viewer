@@ -1,0 +1,181 @@
+{
+  "openapi": "3.2.0",
+  "$self": "https://example.com/openapi/pets.json",
+  "info": {
+    "title": "OpenAPI 3.2 feature tour",
+    "version": "1.0.0",
+    "description": "Exercises OpenAPI 3.2 additions: tag summary/parent/kind, the QUERY method, additionalOperations, querystring parameters, itemSchema streaming, example dataValue, discriminator defaultMapping, server name and the OAuth device authorization flow."
+  },
+  "servers": [
+    {
+      "url": "https://api.example.com",
+      "name": "Production"
+    }
+  ],
+  "tags": [
+    {
+      "name": "pets",
+      "summary": "Pet Store Operations",
+      "description": "All pet endpoints",
+      "kind": "nav"
+    },
+    {
+      "name": "pets-search",
+      "summary": "Pet Search",
+      "parent": "pets",
+      "kind": "nav"
+    }
+  ],
+  "paths": {
+    "/pets": {
+      "get": {
+        "tags": [
+          "pets"
+        ],
+        "operationId": "listPets",
+        "summary": "List pets",
+        "responses": {
+          "200": {
+            "description": "A stream of pets",
+            "content": {
+              "application/jsonl": {
+                "itemSchema": {
+                  "$ref": "#/components/schemas/Pet"
+                }
+              }
+            }
+          }
+        }
+      },
+      "query": {
+        "tags": [
+          "pets-search"
+        ],
+        "operationId": "queryPets",
+        "summary": "QueryMethodSearch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "species": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Matching pets"
+          }
+        }
+      },
+      "additionalOperations": {
+        "COPY": {
+          "tags": [
+            "pets"
+          ],
+          "operationId": "copyPets",
+          "summary": "CopyCustomMethod",
+          "responses": {
+            "204": {
+              "description": "Copied"
+            }
+          }
+        }
+      }
+    },
+    "/search": {
+      "get": {
+        "tags": [
+          "pets-search"
+        ],
+        "operationId": "search",
+        "summary": "QuerystringSearch",
+        "parameters": [
+          {
+            "in": "querystring",
+            "name": "filter",
+            "content": {
+              "application/x-www-form-urlencoded": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "q": {
+                      "type": "string"
+                    },
+                    "limit": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "one": {
+                    "summary": "DataValueExample",
+                    "dataValue": {
+                      "id": 1,
+                      "name": "Rex"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Pet": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "discriminator": {
+          "propertyName": "petType",
+          "defaultMapping": "#/components/schemas/Pet"
+        },
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "petType": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "device": {
+        "type": "oauth2",
+        "description": "Device flow",
+        "oauth2MetadataUrl": "https://auth.example.com/.well-known/oauth-authorization-server",
+        "flows": {
+          "deviceAuthorization": {
+            "deviceAuthorizationUrl": "https://auth.example.com/device",
+            "tokenUrl": "https://auth.example.com/token",
+            "scopes": {
+              "pets:read": "read pets"
+            }
+          }
+        }
+      }
+    }
+  }
+}

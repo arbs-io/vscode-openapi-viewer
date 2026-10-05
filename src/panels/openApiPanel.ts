@@ -13,6 +13,7 @@ import {
 import { Disposable } from '../utils/dispose'
 import { getOpenApiObject } from '../utils/documentOpenApi'
 import { withHardLineBreaks } from '../utils/markdownLineBreaks'
+import { PanelTheme, RendererId, renderers } from './renderers'
 
 export class OpenApiPanel extends Disposable {
   public static currentPanel: OpenApiPanel | undefined
@@ -80,7 +81,9 @@ export class OpenApiPanel extends Disposable {
 
     this._register(
       workspace.onDidChangeConfiguration((e) => {
-        if (e.affectsConfiguration('openapi.preview')) {
+        if (e.affectsConfiguration('openapi.preview.renderer')) {
+          this._update()
+        } else if (e.affectsConfiguration('openapi.preview')) {
           this.updateOpenApiSpecification(this._document)
         }
       })
@@ -148,15 +151,6 @@ export class OpenApiPanel extends Disposable {
   }
 
   private _getHtmlForWebview(webview: Webview) {
-    // Local path to main script run in the webview
-    const scriptPathOnDisk = Uri.joinPath(
-      this._extensionUri,
-      'assets',
-      'rapidoc-min.js'
-    )
-
-    // And the uri we use to load this script in the webview
-    const scriptWebviewUri = webview.asWebviewUri(scriptPathOnDisk)
     const nonce = this._getNonce()
 
     // Scripts are limited to the bundled renderer and the nonce'd inline
@@ -170,44 +164,37 @@ export class OpenApiPanel extends Disposable {
       `connect-src https: http:`,
     ].join('; ')
 
-    const panelTheme = {
-      [ColorThemeKind.Light]: 'light',
-      [ColorThemeKind.Dark]: 'dark',
-      [ColorThemeKind.HighContrast]: 'dark',
-      [ColorThemeKind.HighContrastLight]: 'light',
+    const theme: PanelTheme = {
+      [ColorThemeKind.Light]: 'light' as const,
+      [ColorThemeKind.Dark]: 'dark' as const,
+      [ColorThemeKind.HighContrast]: 'dark' as const,
+      [ColorThemeKind.HighContrastLight]: 'light' as const,
     }[window.activeColorTheme.kind]
 
-    const bgColor = {
-      light: '#F3F3F3',
-      dark: '#252526',
-    }[panelTheme]
+    const rendererId = workspace
+      .getConfiguration('openapi.preview')
+      .get<RendererId>('renderer', 'scalar')
+    const renderer = renderers[rendererId] ?? renderers.scalar
+    const markup = renderer({
+      webview,
+      extensionUri: this._extensionUri,
+      nonce,
+      theme,
+    })
 
     return `<!doctype html>
     <html>
       <head>
         <meta charset="utf-8">
         <meta http-equiv="Content-Security-Policy" content="${csp}">
-        <script nonce="${nonce}" src="${scriptWebviewUri}"></script>
+        ${markup.head}
       </head>
       <body>
-        <rapi-doc
-          id="OpenApiPanel"
-          theme = '${panelTheme}'
-          show-header = 'false'
-          show-info = 'true'
-          allow-authentication ='true'
-          allow-server-selection = 'true'
-          allow-api-list-style-selection ='true'
-          show-method-in-nav-bar ='as-colored-block'
-          use-path-in-nav-bar = 'true'
-          render-style = 'read'
-          nav-bg-color = '${bgColor}'
-        />
+        ${markup.body}
         <script nonce="${nonce}">
+          ${markup.boot}
           window.addEventListener('message', event => {
-            let objSpec = JSON.parse(event.data);
-            let docEl = document.getElementById("OpenApiPanel");
-            docEl.loadSpec(objSpec);
+            window.renderOpenApi(JSON.parse(event.data));
           });
         </script>
       </body>
