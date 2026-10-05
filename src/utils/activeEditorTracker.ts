@@ -40,9 +40,7 @@ export class ActiveEditorTracker extends Disposable {
     return this._activeEditor
   }
 
-  private async _onDidChangeActiveTextEditor(
-    editor: TextEditor | undefined
-  ): Promise<void> {
+  private _onDidChangeActiveTextEditor(editor: TextEditor | undefined): void {
     if (editor === this._activeEditor) {
       return
     }
@@ -51,7 +49,7 @@ export class ActiveEditorTracker extends Disposable {
       return
     }
 
-    if (editor && (await this._isManagedFile(editor))) {
+    if (editor && this._isManagedFile(editor)) {
       this._activeEditor = editor
     } else {
       this._activeEditor = undefined
@@ -59,7 +57,7 @@ export class ActiveEditorTracker extends Disposable {
     this._onDidChangeActiveEditor.fire(this._activeEditor)
   }
 
-  private async _isManagedFile(editor: TextEditor): Promise<boolean> {
+  private _isManagedFile(editor: TextEditor): boolean {
     return isSupportedLanguageMode(editor.document)
   }
 
