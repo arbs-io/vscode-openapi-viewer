@@ -14,5 +14,16 @@ export default tseslint.config(
       '@typescript-eslint/no-non-null-assertion': 'off',
       'no-constant-condition': 'off',
     },
+  },
+  {
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        Buffer: 'readonly',
+        console: 'readonly',
+        fetch: 'readonly',
+        process: 'readonly',
+      },
+    },
   }
 )

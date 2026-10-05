@@ -23,7 +23,7 @@
     "esbuild": "yarn esbuild-base --sourcemap",
     "esbuild-watch": "yarn esbuild-base --sourcemap --watch",
     "typecheck": "node node_modules/typescript-native/bin/tsc -p ./ --noEmit",
-    "lint": "eslint src",
+    "lint": "eslint src scripts",
     "package": "vsce package --no-yarn",
     "deploy": "vsce publish --no-yarn"
   },
