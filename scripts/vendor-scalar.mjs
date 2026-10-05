@@ -10,22 +10,31 @@ import { writeFileSync } from 'node:fs'
 import { gunzipSync } from 'node:zlib'
 
 const pkg = '@scalar/api-reference'
+const registry = 'https://registry.npmjs.org'
 const entry = 'package/dist/browser/standalone.js'
-const bidi = /[؜‎‏‪-‮⁦-⁩]/g
+const bidi = /[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/g
+const semver = /^\d{1,4}\.\d{1,4}\.\d{1,4}(?:-[0-9A-Za-z.-]{1,64})?$/
 
-const version = process.argv[2]
-if (!version) {
-  console.error('usage: node scripts/vendor-scalar.mjs <version>')
+const version = process.argv[2] ?? ''
+if (!semver.test(version)) {
+  console.error('usage: node scripts/vendor-scalar.mjs <version>, e.g. 1.73.0')
   process.exit(1)
 }
 
 async function download() {
-  const meta = await fetch(`https://registry.npmjs.org/${pkg}/${version}`)
+  const metaUrl = new URL(`/${pkg}/${encodeURIComponent(version)}`, registry)
+  const meta = await fetch(metaUrl)
   if (!meta.ok) throw new Error(`${pkg}@${version}: HTTP ${meta.status}`)
   const { dist } = await meta.json()
 
-  const response = await fetch(dist.tarball)
-  if (!response.ok) throw new Error(`${dist.tarball}: HTTP ${response.status}`)
+  // Only ever download tarballs served by the npm registry itself
+  const tarballUrl = new URL(dist.tarball)
+  if (tarballUrl.origin !== registry) {
+    throw new Error(`unexpected tarball location: ${tarballUrl.origin}`)
+  }
+
+  const response = await fetch(tarballUrl)
+  if (!response.ok) throw new Error(`${tarballUrl}: HTTP ${response.status}`)
   const tarball = Buffer.from(await response.arrayBuffer())
 
   const [algorithm, expected] = dist.integrity.split('-')
@@ -38,8 +47,11 @@ async function download() {
 function readEntry(tar, name) {
   for (let offset = 0; offset + 512 <= tar.length; ) {
     const header = tar.subarray(offset, offset + 512)
-    const field = (start, length) =>
-      header.toString('utf8', start, start + length).replace(/\0.*$/s, '')
+    const field = (start, length) => {
+      const value = header.subarray(start, start + length)
+      const end = value.indexOf(0)
+      return value.toString('utf8', 0, end === -1 ? value.length : end)
+    }
     const fileName = field(0, 100)
     if (!fileName) break
     const size = Number.parseInt(field(124, 12).trim() || '0', 8)
@@ -56,13 +68,14 @@ function readEntry(tar, name) {
 const source = readEntry(await download(), entry)
 const escaped = source.replace(
   bidi,
-  (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`
+  (c) => String.raw`\u` + c.codePointAt(0).toString(16).padStart(4, '0')
 )
-const output =
-  `/*! ${pkg} ${version} | MIT | https://github.com/scalar/scalar */\n` +
-  escaped.replace(/\n\/\/# sourceMappingURL=\S+\s*$/, '\n')
+const banner = `/*! ${pkg} ${version} | MIT | https://github.com/scalar/scalar */\n`
+const sourceMap = '\n//# sourceMappingURL='
+const mapIndex = escaped.lastIndexOf(sourceMap)
+const body = mapIndex === -1 ? escaped : `${escaped.slice(0, mapIndex)}\n`
 
-writeFileSync('assets/scalar/standalone.js', output)
+writeFileSync('assets/scalar/standalone.js', banner + body)
 console.log(
   `assets/scalar/standalone.js: ${pkg} ${version}, ` +
     `${source.match(bidi)?.length ?? 0} bidi characters escaped`
