@@ -62,7 +62,18 @@
           "dark": "assets/openapi-icon-dark.png"
         }
       }
-    ]
+    ],
+    "configuration": {
+      "title": "OpenAPI Viewer",
+      "properties": {
+        "openapi.preview.markdownLineBreaks": {
+          "type": "boolean",
+          "default": false,
+          "scope": "resource",
+          "markdownDescription": "Render single newlines in `description` fields as line breaks (GitHub style). By default descriptions follow CommonMark, as required by the OpenAPI Specification, where a single newline is rendered as a space."
+        }
+      }
+    }
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
