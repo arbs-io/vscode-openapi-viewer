@@ -1,7 +1,7 @@
 {
   "name": "vscode-openapi-viewer",
   "displayName": "vscode-openapi-viewer",
-  "description": "A vscode extension to view openapi specifications",
+  "description": "Live, interactive preview of OpenAPI 3.2, 3.1, 3.0 and Swagger 2.0 specifications in JSON or YAML",
   "version": "2.0.0",
   "publisher": "AndrewButson",
   "icon": "images/logo_128x128.png",
@@ -28,12 +28,24 @@
     "deploy": "vsce publish --no-yarn"
   },
   "categories": [
-    "Other",
+    "Visualization",
     "Programming Languages",
-    "Linters",
-    "Debuggers",
-    "Formatters",
-    "Visualization"
+    "Other"
+  ],
+  "keywords": [
+    "openapi",
+    "openapi 3.2",
+    "openapi 3.1",
+    "swagger",
+    "api",
+    "rest",
+    "api documentation",
+    "api reference",
+    "preview",
+    "yaml",
+    "json",
+    "scalar",
+    "rapidoc"
   ],
   "activationEvents": [
     "onStartupFinished",
