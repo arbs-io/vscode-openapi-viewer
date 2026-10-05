@@ -34,8 +34,8 @@ export function applyHardLineBreaks(markdown: string): string {
       if (match) {
         const marker = match[1]
         if (fence === undefined) fence = marker
-        else if (marker[0] === fence[0] && marker.length >= fence.length)
-          fence = undefined
+        // A closing fence repeats the opening character at least as many times
+        else if (marker.startsWith(fence)) fence = undefined
         return line
       }
 
